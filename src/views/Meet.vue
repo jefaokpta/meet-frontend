@@ -4,7 +4,7 @@ import VideoParticipant from '@/components/VideoParticipant.vue';
 
 const videosList = ref([
   {id: 1, title: 'Vue 3 for everyone', speaker: 'John Doe'},
-  {id: 2, title: 'React 18 alpha', speaker: 'Jane Doe'},
+  // {id: 2, title: 'React 18 alpha', speaker: 'Jane Doe'},
   // {id: 3, title: 'Angular 12 is out', speaker: 'John Doe'},
   // {id: 4, title: 'Svelte 4 is coming', speaker: 'Jane Doe'},
   // {id: 5, title: 'Ember 4 is here', speaker: 'John Doe'},
@@ -20,11 +20,21 @@ const videosList = ref([
   // {id: 15, title: 'Deno is secure', speaker: 'John Doe'},
   // {id: 16, title: 'Node.js is powerful', speaker: 'Jane Doe'},
 ]);
+
+const addVideo = () => {
+  videosList.value.push({
+    id: videosList.value.length + 1,
+    title: 'New video',
+    speaker: 'Unknown',
+  });
+};
+
 </script>
 
 <template>
+  <button @click="addVideo"  >Adiciona video</button>
   <div class="video-container">
-    <video-participant v-for="item in videosList" :key="item.id" class="video"/>
+    <video-participant :name="item.speaker" v-for="item in videosList" :key="item.id" class="video"/>
   </div>
 </template>
 
