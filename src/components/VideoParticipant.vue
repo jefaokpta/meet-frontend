@@ -16,11 +16,5 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
-    <video ref="videoRef" autoplay></video>
-  </div>
+  <video ref="videoRef" autoplay></video>
 </template>
-
-<style scoped>
-
-</style>
