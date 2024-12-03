@@ -1,37 +1,51 @@
 <script setup>
 import { ref } from 'vue';
 import VideoParticipant from '@/components/VideoParticipant.vue';
+import Peer from 'peerjs';
 
-const videosList = ref([
-  {id: 1, title: 'Vue 3 for everyone', speaker: 'John Doe'},
-  // {id: 2, title: 'React 18 alpha', speaker: 'Jane Doe'},
-  // {id: 3, title: 'Angular 12 is out', speaker: 'John Doe'},
-  // {id: 4, title: 'Svelte 4 is coming', speaker: 'Jane Doe'},
-  // {id: 5, title: 'Ember 4 is here', speaker: 'John Doe'},
-  // {id: 6, title: 'Backbone 2 is back', speaker: 'Jane Doe'},
-  // {id: 7, title: 'Meteor 2 is hot', speaker: 'John Doe'},
-  // {id: 8, title: 'Aurelia 2 is cool', speaker: 'Jane Doe'},
-  // {id: 9, title: 'Polymer 3 is awesome', speaker: 'John Doe'},
-  // {id: 10, title: 'Vanilla JS rocks', speaker: 'Jane Doe'},
-  // {id: 11, title: 'TypeScript is the future', speaker: 'John Doe'},
-  // {id: 12, title: 'JavaScript is everywhere', speaker: 'Jane Doe'},
-  // {id: 13, title: 'WebAssembly is fast', speaker: 'John Doe'},
-  // {id: 14, title: 'Rust is safe', speaker: 'Jane Doe'},
-  // {id: 15, title: 'Deno is secure', speaker: 'John Doe'},
-  // {id: 16, title: 'Node.js is powerful', speaker: 'Jane Doe'},
-]);
+const videosList = ref([]);
+const myId = ref(null);
 
 const addVideo = () => {
   videosList.value.push({
     id: videosList.value.length + 1,
-    title: 'New video',
     speaker: 'Unknown',
   });
 };
 
+const peer = new Peer();
+
+peer.on('open', id => {
+  myId.value = id;
+});
+
+peer.on('connection', conn => {
+  conn.on('data', data => {
+    console.log('Received', data);
+  });
+});
+
+peer.on('call', call => {
+  navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => {
+      call.answer(stream);
+      call.on('stream', remoteStream => {
+        videosList.value.push({
+          id: videosList.value.length + 1,
+          speaker: 'Unknown',
+          stream: remoteStream,
+        });
+      });
+    })
+    .catch(error => {
+      console.error('Error accessing media devices.', error);
+    });
+});
+
 </script>
 
 <template>
+  <h1>Meet my id {{myId}}</h1>
   <button @click="addVideo"  >Adiciona video</button>
   <div class="video-container">
     <video-participant :name="item.speaker" v-for="item in videosList" :key="item.id" class="video"/>
