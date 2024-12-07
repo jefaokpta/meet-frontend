@@ -5,6 +5,7 @@ import Peer from 'peerjs';
 
 const videosList = ref([]);
 const myId = ref(null);
+const peerId = ref(null);
 
 const addVideo = () => {
   videosList.value.push({
@@ -14,6 +15,12 @@ const addVideo = () => {
 };
 
 const peer = new Peer();
+const sendMessage = (message) => {
+  const anotherPeer = peer.connect(peerId.value);
+  anotherPeer.on('open', () => {
+    anotherPeer.send(message);
+  });
+};
 
 peer.on('open', id => {
   myId.value = id;
@@ -25,7 +32,9 @@ peer.on('connection', conn => {
   });
 });
 
+
 peer.on('call', call => {
+  console.log('bateu no call')
   navigator.mediaDevices.getUserMedia({ video: true })
     .then(stream => {
       call.answer(stream);
@@ -47,6 +56,8 @@ peer.on('call', call => {
 <template>
   <h1>Meet my id {{myId}}</h1>
   <button @click="addVideo"  >Adiciona video</button>
+  <input v-model="peerId" placeholder="Peer ID" />
+  <button @click="sendMessage('fala ae!')">Send Message</button>
   <div class="video-container">
     <video-participant :name="item.speaker" v-for="item in videosList" :key="item.id" class="video"/>
   </div>
