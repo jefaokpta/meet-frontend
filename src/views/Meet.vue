@@ -21,6 +21,22 @@ const sendMessage = (message) => {
     anotherPeer.send(message);
   });
 };
+const callPeer = () => {
+  navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => {
+      const call = peer.call(peerId.value, stream);
+      call.on('stream', remoteStream => {
+        videosList.value.push({
+          id: call.peer,
+          speaker: 'originador',
+          stream: remoteStream,
+        });
+      });
+    })
+    .catch(error => {
+      console.error('Error accessing media devices.', error);
+    });
+};
 
 peer.on('open', id => {
   myId.value = id;
@@ -40,8 +56,8 @@ peer.on('call', call => {
       call.answer(stream);
       call.on('stream', remoteStream => {
         videosList.value.push({
-          id: videosList.value.length + 1,
-          speaker: 'Unknown',
+          id: call.peer,
+          speaker: 'remoto',
           stream: remoteStream,
         });
       });
@@ -54,12 +70,17 @@ peer.on('call', call => {
 </script>
 
 <template>
-  <h1>Meet my id {{myId}}</h1>
-  <button @click="addVideo"  >Adiciona video</button>
-  <input v-model="peerId" placeholder="Peer ID" />
-  <button @click="sendMessage('fala ae!')">Send Message</button>
-  <div class="video-container">
-    <video-participant :name="item.speaker" v-for="item in videosList" :key="item.id" class="video"/>
+  <div>
+    <div>
+      <h1>Meet my id {{myId}}</h1>
+      <button @click="addVideo"  >Adiciona video</button>
+      <input v-model="peerId" placeholder="Peer ID" />
+      <button @click="sendMessage('fala ae!')">Send Message</button>
+      <button @click="callPeer">Video Call Peer</button>
+    </div>
+    <div class="video-container">
+      <video-participant :name="item.speaker" v-for="item in videosList" :key="item.id" class="video"/>
+    </div>
   </div>
 </template>
 
