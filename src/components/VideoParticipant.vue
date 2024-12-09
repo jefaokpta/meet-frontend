@@ -5,18 +5,16 @@ const props = defineProps({
   name: {
     type: String,
     required: true
+  },
+  src: {
+    type: MediaStream,
+    required: true
   }
 });
 const videoRef = ref(null);
 
 onMounted(() => {
-  navigator.mediaDevices.getUserMedia({ video: true })
-      .then(stream => {
-        videoRef.value.srcObject = stream;
-      })
-      .catch(error => {
-        console.error('Error accessing media devices.', error);
-      });
+  videoRef.value.srcObject = props.src;
 });
 
 </script>

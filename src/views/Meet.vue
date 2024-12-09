@@ -8,10 +8,17 @@ const myId = ref(null);
 const peerId = ref(null);
 
 const addVideo = () => {
-  videosList.value.push({
-    id: videosList.value.length + 1,
-    speaker: 'Unknown',
-  });
+  navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => {
+      videosList.value.push({
+        id: videosList.value.length + 1,
+        speaker: 'Adicionado',
+        stream: stream,
+      });
+    })
+    .catch(error => {
+      console.error('Error accessing media devices.', error);
+    });
 };
 
 const peer = new Peer();
@@ -79,7 +86,7 @@ peer.on('call', call => {
       <button @click="callPeer">Video Call Peer</button>
     </div>
     <div class="video-container">
-      <video-participant :name="item.speaker" v-for="item in videosList" :key="item.id" class="video"/>
+      <video-participant :name="item.speaker" :src="item.stream" v-for="item in videosList" :key="item.id" class="video"/>
     </div>
   </div>
 </template>
