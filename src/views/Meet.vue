@@ -2,10 +2,18 @@
 import { ref } from 'vue';
 import VideoParticipant from '@/components/VideoParticipant.vue';
 import Peer from 'peerjs';
+import { WebSocketService } from '@/services/websocket.service.js';
 
 const videosList = ref([]);
 const myId = ref(null);
 const peerId = ref(null);
+const peer = new Peer();
+const socket = new WebSocketService()
+
+socket.socket.on('connect', () => {
+  console.log('conectado')
+  // socket.socket.emit('join', 'teste')
+})
 
 const addVideo = () => {
   navigator.mediaDevices.getUserMedia({ video: true })
@@ -21,7 +29,6 @@ const addVideo = () => {
     });
 };
 
-const peer = new Peer();
 const sendMessage = (message) => {
   const anotherPeer = peer.connect(peerId.value);
   anotherPeer.on('open', () => {
