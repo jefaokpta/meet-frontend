@@ -10,9 +10,8 @@ const peerId = ref(null);
 const peer = new Peer();
 const socket = new WebSocketService()
 
-socket.socket.on('connect', () => {
-  console.log('conectado')
-  // socket.socket.emit('join', 'teste')
+socket.on('message', (data) => {
+  console.log('message', data)
 })
 
 const addVideo = () => {
