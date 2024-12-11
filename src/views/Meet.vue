@@ -10,21 +10,21 @@ const peerId = ref(null);
 const peer = new Peer();
 const socket = new WebSocketService()
 
-socket.on('message', (data) => {
-  console.log('message', data)
+socket.on('new-participant', (data) => {
+  console.log('recebido participant', data)
 })
 
-const addVideo = () => {
+const addMyVideo = (id) => {
   navigator.mediaDevices.getUserMedia({ video: true })
     .then(stream => {
       videosList.value.push({
-        id: videosList.value.length + 1,
-        speaker: 'Adicionado',
+        id,
+        speaker: 'Eu',
         stream: stream,
       });
     })
     .catch(error => {
-      console.error('Error accessing media devices.', error);
+      console.error('Error accessing my media devices.', error);
     });
 };
 
@@ -53,6 +53,8 @@ const callPeer = () => {
 
 peer.on('open', id => {
   myId.value = id;
+  addMyVideo(id)
+  socket.emit('new-participant', { id, speaker: 'outro' })
 });
 
 peer.on('connection', conn => {
@@ -63,7 +65,6 @@ peer.on('connection', conn => {
 
 
 peer.on('call', call => {
-  console.log('bateu no call')
   navigator.mediaDevices.getUserMedia({ video: true })
     .then(stream => {
       call.answer(stream);
@@ -86,7 +87,7 @@ peer.on('call', call => {
   <div>
     <div>
       <h1>Meet my id {{myId}}</h1>
-      <button @click="addVideo"  >Adiciona video</button>
+      <button @click="addMyVideo"  >Adiciona video</button>
       <input v-model="peerId" placeholder="Peer ID" />
       <button @click="sendMessage('fala ae!')">Send Message</button>
       <button @click="callPeer">Video Call Peer</button>
