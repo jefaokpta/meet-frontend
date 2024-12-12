@@ -5,13 +5,11 @@ import Peer from 'peerjs';
 import { WebSocketService } from '@/services/websocket.service.js';
 
 const videosList = ref([]);
-const myId = ref(null);
-const peerId = ref(null);
 const peer = new Peer();
 const socket = new WebSocketService()
 
-socket.on('new-participant', (data) => {
-  console.log('recebido participant', data)
+socket.on('new-participant', (participant) => {
+  callPeer(participant);
 })
 
 const addMyVideo = (id) => {
@@ -28,20 +26,14 @@ const addMyVideo = (id) => {
     });
 };
 
-const sendMessage = (message) => {
-  const anotherPeer = peer.connect(peerId.value);
-  anotherPeer.on('open', () => {
-    anotherPeer.send(message);
-  });
-};
-const callPeer = () => {
+const callPeer = (participant) => {
   navigator.mediaDevices.getUserMedia({ video: true })
     .then(stream => {
-      const call = peer.call(peerId.value, stream);
+      const call = peer.call(participant.id, stream);
       call.on('stream', remoteStream => {
         videosList.value.push({
-          id: call.peer,
-          speaker: 'originador',
+          id: participant.id,
+          speaker: participant.speaker,
           stream: remoteStream,
         });
       });
@@ -52,17 +44,9 @@ const callPeer = () => {
 };
 
 peer.on('open', id => {
-  myId.value = id;
   addMyVideo(id)
   socket.emit('new-participant', { id, speaker: 'outro' })
 });
-
-peer.on('connection', conn => {
-  conn.on('data', data => {
-    console.log('Received', data);
-  });
-});
-
 
 peer.on('call', call => {
   navigator.mediaDevices.getUserMedia({ video: true })
@@ -86,11 +70,7 @@ peer.on('call', call => {
 <template>
   <div>
     <div>
-      <h1>Meet my id {{myId}}</h1>
-      <button @click="addMyVideo"  >Adiciona video</button>
-      <input v-model="peerId" placeholder="Peer ID" />
-      <button @click="sendMessage('fala ae!')">Send Message</button>
-      <button @click="callPeer">Video Call Peer</button>
+      <h1>Meet Jefones</h1>
     </div>
     <div class="video-container">
       <video-participant :name="item.speaker" :src="item.stream" v-for="item in videosList" :key="item.id" class="video"/>
