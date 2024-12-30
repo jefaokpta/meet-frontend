@@ -7,32 +7,44 @@ import { WebSocketService } from '@/services/websocket.service.js';
 const videosList = ref([]);
 const peer = new Peer();
 const socket = new WebSocketService()
+let myId = '';
 
 socket.on('new-participant', (participant) => {
+  console.log('new-participant', participant);
   callPeer(participant);
 })
 
-const addMyVideo = (id) => {
+socket.on('participant-left', (socketId) => {
+  videosList.value = videosList.value.filter(item => item.socketId !== socketId);
+})
+
+peer.on('open', id => {
+  myId = id;
+  socket.emit('new-participant', { id, speaker: 'outro' })
+});
+
+function addMyVideo(participant){
   navigator.mediaDevices.getUserMedia({ video: true })
     .then(stream => {
-      videosList.value.push({
-        id,
-        speaker: 'Eu',
-        stream: stream,
-      });
+      videosList.value.push({participant, stream, speaker: 'eu msm'});
     })
     .catch(error => {
       console.error('Error accessing my media devices.', error);
     });
-};
+}
 
-const callPeer = (participant) => {
+function callPeer(participant){
+  if (participant.id === myId) {
+    addMyVideo(participant.id);
+    return;
+  }
   navigator.mediaDevices.getUserMedia({ video: true })
     .then(stream => {
       const call = peer.call(participant.id, stream);
       call.on('stream', remoteStream => {
         videosList.value.push({
           id: participant.id,
+          socketId: participant.socketId,
           speaker: participant.speaker,
           stream: remoteStream,
         });
@@ -42,11 +54,6 @@ const callPeer = (participant) => {
       console.error('Error accessing media devices.', error);
     });
 };
-
-peer.on('open', id => {
-  addMyVideo(id)
-  socket.emit('new-participant', { id, speaker: 'outro' })
-});
 
 peer.on('call', call => {
   navigator.mediaDevices.getUserMedia({ video: true })
