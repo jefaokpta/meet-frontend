@@ -11,7 +11,7 @@ let myId = '';
 
 socket.on('new-participant', (participant) => {
   console.log('new-participant', participant);
-  callPeer(participant);
+  newPeerReceived(participant);
 })
 
 socket.on('participant-left', (socketId) => {
@@ -33,7 +33,7 @@ function addMyVideo(participant){
     });
 }
 
-function callPeer(participant){
+function newPeerReceived(participant){
   if (participant.id === myId) {
     addMyVideo(participant.id);
     return;
