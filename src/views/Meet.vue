@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import VideoParticipant from '@/components/VideoParticipant.vue';
 import Peer from 'peerjs';
 import { WebSocketService } from '@/services/websocket.service.js';
+import { Recorder } from '@/services/recorder.js';
 
 const videosList = ref([]);
 const peer = new Peer();
@@ -26,7 +27,12 @@ peer.on('open', id => {
 function addMyVideo(participant){
   navigator.mediaDevices.getUserMedia({ video: true })
     .then(stream => {
-      videosList.value.push({participant, stream, speaker: 'eu msm'});
+      videosList.value.push({
+        ...participant,
+        speaker: 'eu msm',
+        stream,
+        recorder: new Recorder(stream),
+      });
     })
     .catch(error => {
       console.error('Error accessing my media devices.', error);
@@ -35,7 +41,7 @@ function addMyVideo(participant){
 
 function newPeerReceived(participant){
   if (participant.id === myId) {
-    addMyVideo(participant.id);
+    addMyVideo(participant);
     return;
   }
   navigator.mediaDevices.getUserMedia({ video: true })
@@ -47,6 +53,7 @@ function newPeerReceived(participant){
           socketId: participant.socketId,
           speaker: participant.speaker,
           stream: remoteStream,
+          recorder: new Recorder(remoteStream),
         });
       });
     })
@@ -72,12 +79,26 @@ peer.on('call', call => {
     });
 });
 
+function startRecording(){
+  videosList.value.forEach(p => {
+    p.recorder.startRecording()
+  });
+}
+
+function stopRecording(){
+  videosList.value.forEach(p => {
+    p.recorder.stopRecording()
+  });
+}
+
 </script>
 
 <template>
   <div>
     <div>
       <h1>Meet Jefones</h1>
+      <button @click="startRecording">Start Recording</button>
+      <button @click="stopRecording">Stop Recording</button>
     </div>
     <div class="video-container">
       <video-participant :name="item.speaker" :src="item.stream" v-for="item in videosList" :key="item.id" class="video"/>
