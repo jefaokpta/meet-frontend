@@ -142,18 +142,19 @@ body {
   align-content: center;
   width: 100%;
   height: 100%;
+  min-height: 250px; /* Minimum height */
   padding: 10px;
   gap: 10px;
 }
 
 .video {
   flex: 1 1 calc(25% - 10px); /* Tamanho base: 25% da largura da tela menos o espaçamento */
-  max-width: calc(25% - 10px);
+  max-width: 100%;
   aspect-ratio: 16 / 9; /* Proporção do vídeo */
-  background-color: #000;
+  background-color: black;
   border-radius: 5px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
 }
 
 @media (max-width: 1200px) {
