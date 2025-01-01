@@ -45,7 +45,6 @@ export class Recorder {
   }
 
   _download() {
-    console.log('Download iniciado', this.chunks);
     const blob = new Blob(this.chunks, { type: this.videoType });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
