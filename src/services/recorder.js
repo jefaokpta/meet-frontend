@@ -14,7 +14,6 @@ export class Recorder {
 
     this.recorder.onstop = (event) => {
       console.log("Recording stopped", this.chunks);
-      this._download();
     }
 
     this.recorder.ondataavailable = (event) => {

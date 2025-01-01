@@ -3,11 +3,12 @@ import { ref } from 'vue';
 import VideoParticipant from '@/components/VideoParticipant.vue';
 import Peer from 'peerjs';
 import { WebSocketService } from '@/services/websocket.service.js';
-import { Recorder } from '@/services/recorder.js';
+import { MixStream } from '@/services/MixStream.js';
 
 const videosList = ref([]);
 const peer = new Peer();
 const socket = new WebSocketService()
+const mixStream = new MixStream();
 let myId = '';
 
 socket.on('new-participant', (participant) => {
@@ -31,8 +32,8 @@ function addMyVideo(participant){
         ...participant,
         speaker: 'eu msm',
         stream,
-        recorder: new Recorder(stream),
       });
+      mixStream.addStream(stream);
     })
     .catch(error => {
       console.error('Error accessing my media devices.', error);
@@ -53,8 +54,8 @@ function newPeerReceived(participant){
           socketId: participant.socketId,
           speaker: participant.speaker,
           stream: remoteStream,
-          recorder: new Recorder(remoteStream),
         });
+        mixStream.addStream(remoteStream);
       });
     })
     .catch(error => {
@@ -72,6 +73,7 @@ peer.on('call', call => {
           speaker: 'remoto',
           stream: remoteStream,
         });
+        mixStream.addStream(remoteStream);
       });
     })
     .catch(error => {
@@ -80,15 +82,25 @@ peer.on('call', call => {
 });
 
 function startRecording(){
-  videosList.value.forEach(p => {
-    p.recorder.startRecording()
-  });
+  mixStream.startRecording();
 }
 
 function stopRecording(){
-  videosList.value.forEach(p => {
-    p.recorder.stopRecording()
-  });
+  mixStream.stopRecording();
+}
+
+function shareScreen(){
+  navigator.mediaDevices.getDisplayMedia({ video: true })
+    .then(stream => {
+      videosList.value.push({
+        id: 'screen',
+        speaker: 'screen',
+        stream,
+      });
+    })
+    .catch(error => {
+      console.error('Error accessing media devices.', error);
+    });
 }
 
 </script>
@@ -99,6 +111,7 @@ function stopRecording(){
       <h1>Meet Jefones</h1>
       <button @click="startRecording">Start Recording</button>
       <button @click="stopRecording">Stop Recording</button>
+      <button @click="shareScreen">Screen Recorder</button>
     </div>
     <div class="video-container">
       <video-participant :name="item.speaker" :src="item.stream" v-for="item in videosList" :key="item.id" class="video"/>
