@@ -11,10 +11,10 @@ export class Recorder {
     const options = this._setup();
     if (!this.stream.active) return;
     this.recorder = new MediaRecorder(this.stream, options);
-    console.log('Recording preparado', this.recorder, 'options', options);
 
     this.recorder.onstop = (event) => {
       console.log("Recording stopped", this.chunks);
+      this._download();
     }
 
     this.recorder.ondataavailable = (event) => {
@@ -23,7 +23,7 @@ export class Recorder {
     }
 
     this.recorder.start();
-    console.log("Recording iniciado");
+    console.log("Recording iniciado", this.recorder);
   }
 
   _setup() {
@@ -41,8 +41,20 @@ export class Recorder {
 
   stopRecording() {
     if (!this.recorder) return;
-    console.log('parando gravacao status: ', this.recorder.state);
     this.recorder.stop();
+  }
+
+  _download() {
+    console.log('Download iniciado', this.chunks);
+    const blob = new Blob(this.chunks, { type: this.videoType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    document.body.appendChild(a);
+    a.style.display = "none";
+    a.href = url;
+    a.download = "video.webm";
+    document.body.appendChild(a);
+    a.click();
   }
 
 }
