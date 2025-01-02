@@ -8,6 +8,11 @@ const router = createRouter({
       name: 'meet',
       component: () => import('../views/Meet.vue'),
     },
+    {
+      path: '/div',
+      name: 'div',
+      component: () => import('../views/Division.vue'),
+    }
   ],
 })
 

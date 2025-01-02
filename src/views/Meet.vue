@@ -61,7 +61,7 @@ function newPeerReceived(participant){
     .catch(error => {
       console.error('Error accessing media devices.', error);
     });
-};
+}
 
 peer.on('call', call => {
   navigator.mediaDevices.getUserMedia({ video: true })
@@ -132,7 +132,7 @@ body {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: #f0f0f0;
+  background-color: gray
 }
 
 .video-container {
@@ -148,7 +148,7 @@ body {
 }
 
 .video {
-  flex: 1 1 calc(25% - 10px); /* Tamanho base: 25% da largura da tela menos o espaçamento */
+  flex: 1 1; /* Tamanho base: 25% da largura da tela menos o espaçamento */
   max-width: 100%;
   aspect-ratio: 16 / 9; /* Proporção do vídeo */
   background-color: black;

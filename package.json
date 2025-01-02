@@ -11,6 +11,7 @@
   "dependencies": {
     "multistreamsmixer": "^1.2.2",
     "peerjs": "^1.5.4",
+    "primeflex": "^3.3.1",
     "socket.io-client": "^4.8.1",
     "vue": "^3.5.12",
     "vue-router": "^4.4.5"
